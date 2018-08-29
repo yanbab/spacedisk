@@ -28,7 +28,7 @@ function onReady() {
   const _locales = __dirname + '/locales'
   
   i18n.configure({
-    defaultLocale: 'en',//app.getLocale(),
+    defaultLocale: app.getLocale(),
     directory: _locales
   })
   

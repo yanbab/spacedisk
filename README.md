@@ -2,8 +2,7 @@
 
 Simply show disk usage in your menu bar
 
-![Screenshot](build/screenshot.png)
-![Screenshot](build/screenshot-linux.png)
+![Screenshot](build/screenshot.png)![Screenshot](build/screenshot-linux.png)
 
 Screenshots from MacOS and Linux (XFCE)
 
