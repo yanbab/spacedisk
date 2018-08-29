@@ -28,7 +28,7 @@ function onReady() {
   const _locales = __dirname + '/locales'
   
   i18n.configure({
-    defaultLocale: app.getLocale(),
+    defaultLocale: 'en',//app.getLocale(),
     directory: _locales
   })
   
@@ -49,6 +49,7 @@ function onReady() {
       { type: 'separator' },
       { label: __('About %s', app.getName()), role: 'about' },
       { label: __('Home page'), click: onHomepage },
+      //{ label: __('Check for updates'), click: onUpgrade },
       { label: __('Quit'), click: app.quit },
     ])
     tray.setContextMenu(menu)
@@ -123,6 +124,13 @@ function onHomepage() {
   } else {
     console.log('%s error', 'No Homepage')
   }
+}
+
+function onUpgrade() {
+  dialog.showMessageBox({
+   type: "info",
+   message: __('No updates found'),
+  })
 }
 
 function onUncaughtException(error) {
