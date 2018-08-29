@@ -1,0 +1,19 @@
+{
+	"Total: %s": "Total : %s",
+	"Free": "Disponible",
+	"Used": "Utilisé",
+	"Show percentage": "Afficher le pourcentage",
+	"Launch on startup": "Lancer au démarrage",
+	"Empty trash": "Vider la corbeille",
+	"About %s": "À propos de %s",
+	"Home page": "Site web",
+	"Quit": "Quitter",
+	"Emptied trash": "Corbeille vidée",
+	"Saved %s": "%s libérés",
+	"%s error": "Erreur %s",
+	"Please check %s install": "Veuillez vérifier l'installation de %s"
+	"TB": "To",
+	"GB": "Go",
+	"MB": "Mo",
+	"kB": "ko"
+}
