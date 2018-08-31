@@ -1,6 +1,6 @@
 # SpaceDisk
 
-Simply show disk usage in your menu bar
+Show disk usage in your menu bar
 
 ![Screenshot](build/screenshot.png)![Screenshot](build/screenshot-linux.png)
 
@@ -14,7 +14,7 @@ Screenshots from MacOS and Linux (XFCE)
 
 **Source code**
 
-> **[spacedisk-1.0.0.zip](https://github.com/yanbab/spacedisk/archive/v1.0.0.zip)**
+> **[spacedisk-1.0.0.zip](https://github.com/yanbab/spacedisk/archive/v1.0.0.zip)** (94 kB)
 
 ## Contribute
 
@@ -26,7 +26,7 @@ Screenshots from MacOS and Linux (XFCE)
 
 **Commands**
 
-    npm run start  # run localy
+    npm run start  # run app
     npm run dist   # buid app
     npm run build  # build installer
 

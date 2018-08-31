@@ -3,10 +3,7 @@
 // Show disk usage in menu bar
 //
 
-// Do not save store on update
-// change icon/title only if needed
-
-const { app, shell, Menu, Tray, BrowserWindow, Notification, dialog } = require('electron')
+const { app, shell, Menu, Tray, Notification, dialog } = require('electron')
 const diskspace = require('diskspace')
 const emptyTrash = require('empty-trash')
 const Store = require('electron-store')
@@ -16,56 +13,32 @@ const i18n = require('i18n')
 const __ = i18n.__
 
 let tray = null
-let info = null
 let menu = null
 let store = new Store()
-let theme = store.get('theme', 'default')
-let launcher = new AutoLaunch({ name: app.getName() })
+let autolaunch = new AutoLaunch({ name: app.getName() })
+let info = null
 
-function onReady() {
-  
-  const _interval = 5000
-  const _locales = __dirname + '/locales'
-  
-  i18n.configure({
-    defaultLocale: app.getLocale(),
-    directory: _locales
-  })
-  
-  getDisk((diskinfo) => {
-    info = diskinfo
-    tray = new Tray(formatIcon(info))
-    menu = Menu.buildFromTemplate([
-      { label: __('Total: %s', formatFileSize(info.total)), enabled: false },
-      { type: 'separator' },
-      { label: __('Free'), type: 'radio', click: onRender, checked: store.get('show_available', true) },
-      { label: __('Used'), type: 'radio', click: onRender, checked: ! store.get('show_available', true) },
-      { type: 'separator' },
-      { label: __('Show percentage'), type: 'checkbox', click: onRender, checked: store.get('show_percentage', false) },
-      { type: 'separator' },
-      { label: __('Launch on startup'), type:'checkbox', click: onToggleAutostart, checked: store.get('autostart', false) },
-      { type: 'separator' },
-      { label: __('Empty trash'), click: onTrash },
-      { type: 'separator' },
-      { label: __('About %s', app.getName()), role: 'about' },
-      { label: __('Home page'), click: onHomepage },
-      //{ label: __('Check for updates'), click: onUpgrade },
-      { label: __('Quit'), click: app.quit },
-    ])
-    tray.setContextMenu(menu)
-    onRender()
-  })
-  
-  setInterval(() => {
-    getDisk((diskinfo) => {
-      info = diskinfo
-      onRender()
-    })
-  }, _interval)
-
+function getMenu() {
+  return [
+    { label: __('Total: %s', formatFileSize(info.total)), enabled: false },
+    { type: 'separator' },
+    { label: __('Free'), type: 'radio', click: onRender, checked: store.get('show_available', true) },
+    { label: __('Used'), type: 'radio', click: onRender, checked: !store.get('show_available', true) },
+    { type: 'separator' },
+    { label: __('Show percentage'), type: 'checkbox', click: onRender, checked: store.get('show_percentage', false) },
+    { type: 'separator' },
+    { label: __('Launch on startup'), type:'checkbox', click: onToggleAutostart, checked: store.get('autostart', false) },
+    { type: 'separator' },
+    { label: __('Empty trash'), click: onTrash },
+    { type: 'separator' },
+    { label: __('About %s', app.getName()), role: 'about' },
+    { label: __('Home page'), click: onHomepage },
+    //{ label: __('Check for updates'), click: onUpgrade },
+    { label: __('Quit'), click: app.quit },
+  ]
 }
 
-function getState() {
+function getMenuState() {
   return {
     'show_available': menu.items[2].checked,
     'show_percentage': menu.items[5].checked,
@@ -73,32 +46,66 @@ function getState() {
   }
 }
 
-function storeState(state) {
+function storeMenuState(state) {
   store.set('show_available', state.show_available)
   store.set('show_percentage', state.show_percentage)
   store.set('autostart', state.autostart)
 }
 
-function onRender(fromMenu) {
-  let state = getState()  
+function onReady() {
+  
+  const interval = 5000
+  const locales = __dirname + '/locales'
+  
+  // i18n
+  i18n.configure({
+    defaultLocale: app.getLocale(),
+    directory: locales,
+    // updateFiles: false
+  })
+
+  // Build menu
+  getDisk((diskinfo) => {
+    info = diskinfo
+    tray = new Tray(formatIcon(info))
+    menu = Menu.buildFromTemplate(getMenu())
+    tray.setContextMenu(menu)
+    onRender()
+  })
+  
+  // Update every 5s
+  setInterval( () => {
+    getDisk((diskinfo) => {
+      info = diskinfo
+      onRender()
+    })
+  }, interval)
+
+}
+
+function onRender(menu_item) {
+  let state = getMenuState()  
   let title = formatDiskInfo(info, state.show_available, state.show_percentage)
   let icon = formatIcon(info, state.show_available)
-  tray.setTitle(title)
-  tray.setToolTip(title)
-  tray.setImage(icon)
-  if(fromMenu) {
-    storeState(state)
+  // FIXME: only update ui on value change
+  if(true) {
+    tray.setTitle(title)
+    tray.setToolTip(title)
+    tray.setImage(icon)
+  }
+  if(menu_item) {
+    storeMenuState(state)
   }
 }
 
-function onToggleAutostart(item) {
-  let autostart = item.checked
+function onToggleAutostart(menu_item) {
+  let autostart = menu_item.checked
   if(autostart) {
-    launcher.enable()
+    autolaunch.enable()
   } else {
-    launcher.disable()
+    autolaunch.disable()
   }
-  store.set('autostart', autostart)
+  storeMenuState(getMenuState())
 }
 
 function onTrash() {
@@ -143,15 +150,14 @@ function onUncaughtException(error) {
 }
 
 function formatIcon(disk_info, show_available) {
-  let _assets = __dirname + '/themes/' + theme
-  let total = disk_info.total
+  let path_icon = __dirname + '/themes/default/'
   let value = disk_info.used
   if(show_available) {
     value = disk_info.free
   } 
-  let val = parseInt( value * 10 / total )
+  let val = parseInt( value * 9 / disk_info.total )
   let icon = 'level' + val + 'Template.png'
-  return _assets + '/' + icon 
+  return path_icon + icon 
 }
 
 function formatDiskInfo(diskspace, show_available, show_percentage) {
